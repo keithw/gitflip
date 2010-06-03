@@ -2,5 +2,9 @@
 
 #include "objects.hpp"
 
-template class std::tr1::unordered_map<string, GitObject *>;
-template class std::tr1::unordered_map<off_t, GitObject *>;
+using namespace std;
+using namespace std::tr1;
+
+template class unordered_map<string, GitObject *>;
+template class unordered_map<off_t, GitObject *>;
+template class unordered_multimap<GitObject *, GitObject *>;

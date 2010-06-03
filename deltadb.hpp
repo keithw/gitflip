@@ -8,15 +8,18 @@
 #include "pack.hpp"
 
 using namespace std;
+using namespace std::tr1;
 
-typedef std::tr1::unordered_map<string, GitObject *> hash_map_t;
-typedef std::tr1::unordered_map<off_t, GitObject *> index_map_t;
+typedef unordered_map<string, GitObject *> hash_map_t;
+typedef unordered_map<off_t, GitObject *> index_map_t;
+typedef unordered_multimap<GitObject *, GitObject *> child_map_t;
 
 class DeltaDB
 {
 private:
   hash_map_t hash_map;
   index_map_t index_map;
+  child_map_t child_map;
 
 public:
   DeltaDB( Pack *pack );

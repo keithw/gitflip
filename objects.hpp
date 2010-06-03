@@ -96,7 +96,7 @@ protected:
   GitObject *reference_object;
 
 public:
-  Delta() : real_object(0) {}
+  Delta() : real_object( NULL ), reference_object( NULL ) {}
   ~Delta() { if ( real_object ) { delete real_object; } }
   GitObject* get_reference( void ) const { return reference_object; }
 };

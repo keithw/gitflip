@@ -14,36 +14,24 @@ DeltaDB::DeltaDB( Pack *pack )
   }
 
   /* Resolve all delta references */
-  for ( hash_map_t::iterator i = hash_map.begin();
-        i != hash_map.end();
-        i++ ) {
+  for ( hash_map_t::iterator i = hash_map.begin(); i != hash_map.end(); i++ ) {
     GitObject *obj = i->second;
-    obj->resolve( this );
-  }
+    if ( obj->resolve( this ) ) {
+      /* Flip the delta-dependency graph */
+      Delta *delta = static_cast<Delta *>( obj );
+      assert( delta );
 
-  /* Print chains */
-  for ( hash_map_t::iterator i = hash_map.begin();
-        i != hash_map.end();
-        i++ ) {
-    GitObject *obj = i->second;    
-    Delta *delta;
+      GitObject *parent = delta->get_reference();
+      assert( parent );
 
-    while ( (delta = dynamic_cast<Delta *>( obj )) ) {
-      delta->get_hash()->print();
-      fprintf( stderr, " references " );
-      delta->get_reference()->get_hash()->print();
-      fprintf( stderr, " : " );
-      obj = delta->get_reference();
+      child_map.insert( child_map_t::value_type( parent, delta ) );
     }
-    fprintf( stderr, "\n\n" );
   }
 }
 
 DeltaDB::~DeltaDB()
 {
-  for ( hash_map_t::iterator i = hash_map.begin();
-        i != hash_map.end();
-        i++ ) {
+  for ( hash_map_t::iterator i = hash_map.begin(); i != hash_map.end(); i++ ) {
     GitObject *obj = i->second;
     delete obj;
   }
