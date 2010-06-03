@@ -13,6 +13,7 @@ using namespace std::tr1;
 typedef unordered_map<string, GitObject *> hash_map_t;
 typedef unordered_map<off_t, GitObject *> index_map_t;
 typedef unordered_multimap<GitObject *, GitObject *> child_map_t;
+typedef unordered_map<GitObject *, char> base_map_t;
 
 class DeltaDB
 {
@@ -20,6 +21,7 @@ private:
   hash_map_t hash_map;
   index_map_t index_map;
   child_map_t child_map;
+  base_map_t base_map;
 
 public:
   DeltaDB( Pack *pack );

@@ -16,19 +16,16 @@ int main( int argc, char *argv[] )
   char *pack_filename = argv[ 1 ];
   char *idx_filename = argv[ 2 ];
 
-  Pack *pack = NULL;
-  DeltaDB *deltas = NULL;
-
   try {
-    pack = new Pack( pack_filename, idx_filename );
-    deltas = new DeltaDB( pack );
+    Pack *pack = new Pack( pack_filename, idx_filename );
+    DeltaDB *deltas = new DeltaDB( pack );
+
+    delete deltas;
+    delete pack;
   } catch ( Exception *e ) {
     cout << e->str();
     return 1;
   }
-
-  delete deltas;
-  delete pack;
 
   return 0;
 }

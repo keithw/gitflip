@@ -63,6 +63,7 @@ public:
 
   off_t get_header_index( void ) const { return header_index; }
   const sha1* const get_hash( void ) const { return &hash; }
+  size_t get_size( void ) const { return size; }
 };
 
 class Commit : public GitObject

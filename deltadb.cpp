@@ -1,3 +1,5 @@
+#include <typeinfo>
+
 #include "deltadb.hpp"
 #include "objects.hpp"
 
@@ -25,6 +27,25 @@ DeltaDB::DeltaDB( Pack *pack )
       assert( parent );
 
       child_map.insert( child_map_t::value_type( parent, delta ) );
+    } else {
+      /* Object is not a delta type */
+      base_map.insert( base_map_t::value_type( obj, true ) );
+    }
+  }
+
+  /* Count object types */
+  for ( base_map_t::iterator i = base_map.begin(); i != base_map.end(); i++ ) {
+    GitObject *obj = i->first;
+    if ( typeid( *obj ) == typeid( Commit ) ) {
+      printf( "commit %d\n", obj->get_size() );
+    } else if ( typeid( *obj ) == typeid( Tree ) ) {
+      printf( "tree %d\n", obj->get_size() );
+    } else if ( typeid( *obj ) == typeid( Blob ) ) {
+      printf( "blob %d\n", obj->get_size() );
+    } else if ( typeid( *obj ) == typeid( Tag ) ) {
+      printf( "tag %d\n", obj->get_size() );
+    } else {
+      throw InternalError();
     }
   }
 }
