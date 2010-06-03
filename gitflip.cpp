@@ -20,8 +20,12 @@ int main( int argc, char *argv[] )
     Pack *pack = new Pack( pack_filename, idx_filename );
     DeltaDB *deltas = new DeltaDB( pack );
 
+    fprintf( stderr, "Traversed data len: %d.\n", deltas->traverse_all() );
+
+    fprintf( stderr, "Destroying objects... " );
     delete deltas;
     delete pack;
+    fprintf( stderr, "done.\n" );
   } catch ( Exception *e ) {
     cout << e->str();
     return 1;

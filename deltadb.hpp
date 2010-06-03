@@ -23,12 +23,16 @@ private:
   child_map_t child_map;
   base_map_t base_map;
 
+  int recursive_traverse( GitObject *obj, GitObject *parent ) const;
+
 public:
   DeltaDB( Pack *pack );
   ~DeltaDB();
 
   GitObject* lookup_hash( const sha1 hash ) const;
   GitObject* lookup_header_index( const off_t header_index ) const;
+
+  unsigned int traverse_all( void ) const;
 };
 
 #endif

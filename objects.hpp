@@ -20,7 +20,7 @@ public:
   sha1() {}
   void print( void ) const {
     for ( int i = 0; i < 20; i++ ) {
-      fprintf( stderr, "%02x", hash[ i ] );
+      printf( "%02x", hash[ i ] );
     }
   }
   string str( void ) const
@@ -47,6 +47,11 @@ public:
   virtual void contents( void ) = 0;
   virtual bool resolve( DeltaDB *db ) { return false; }
 
+  uint8_t *decoded_data;
+
+  void inflate( void );
+  virtual void apply_delta( GitObject *parent ) {}
+
   static GitObject* make_object( const Pack *pack, off_t header_index, const sha1 hash );
 
   void init( const Pack *s_pack, off_t s_data_index, off_t s_header_index,
@@ -64,6 +69,8 @@ public:
   off_t get_header_index( void ) const { return header_index; }
   const sha1* const get_hash( void ) const { return &hash; }
   size_t get_size( void ) const { return size; }
+
+  
 };
 
 class Commit : public GitObject
@@ -93,12 +100,10 @@ public:
 class Delta : public GitObject
 {
 protected:
-  GitObject *real_object;
   GitObject *reference_object;
 
 public:
-  Delta() : real_object( NULL ), reference_object( NULL ) {}
-  ~Delta() { if ( real_object ) { delete real_object; } }
+  Delta() : reference_object( NULL ) {}
   GitObject* get_reference( void ) const { return reference_object; }
 };
 
