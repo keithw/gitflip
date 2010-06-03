@@ -14,7 +14,6 @@ Index::Index( char *filename )
   assert( htonl( word( 1 ) ) == 2 );
 
   size = htonl( word( 2 + 255 ) );
-  fprintf( stderr, "Index size: %d\n", size );
 
   assert( get_filesize() == sizeof( uint32_t ) * (2 + 256 + 7 * size + 10) );
 }

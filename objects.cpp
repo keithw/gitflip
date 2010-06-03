@@ -3,6 +3,7 @@
 
 #include "objects.hpp"
 #include "pack.hpp"
+#include "deltadb.hpp"
 
 enum TypeCode { OBJ_COMMIT = 1,
 		OBJ_TREE,
@@ -76,4 +77,16 @@ void Ref_Delta::decode_delta_ptr( void )
   for ( int i = 0; i < 20; i++ ) {
     reference.hash[ i ] = pack->byte( data_index + i );
   }
+}
+
+bool Ofs_Delta::resolve( DeltaDB *db )
+{
+  reference_object = db->lookup_header_index( reference_header_index );
+  return true;
+}
+
+bool Ref_Delta::resolve( DeltaDB *db )
+{
+  reference_object = db->lookup_hash( reference );
+  return true;
 }

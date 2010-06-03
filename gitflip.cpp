@@ -3,6 +3,7 @@
 
 #include "exceptions.hpp"
 #include "pack.hpp"
+#include "deltadb.hpp"
 
 int main( int argc, char *argv[] )
 {
@@ -16,19 +17,17 @@ int main( int argc, char *argv[] )
   char *idx_filename = argv[ 2 ];
 
   Pack *pack = NULL;
+  DeltaDB *deltas = NULL;
 
   try {
     pack = new Pack( pack_filename, idx_filename );
+    deltas = new DeltaDB( pack );
   } catch ( Exception *e ) {
     cout << e->str();
     return 1;
   }
 
-  for ( unsigned int i = 0; i < pack->get_object_count(); i++ ) {
-    GitObject *obj = pack->make_object( i );
-    delete obj;
-  }
-
+  delete deltas;
   delete pack;
 
   return 0;

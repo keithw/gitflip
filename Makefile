@@ -1,5 +1,5 @@
-source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp
-objects = file.o pack.o index.o exceptions.o objects.o
+source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp templates.cpp
+objects = file.o pack.o index.o exceptions.o objects.o deltadb.o templates.o
 executables = gitflip
 
 CPP = g++
@@ -10,6 +10,9 @@ all: $(executables)
 
 gitflip: gitflip.o $(objects)
 	$(CPP) $(CPPFLAGS) -o $@ $+ $(LIBS)
+
+deltadb.o: deltadb.cpp
+	$(CPP) $(CPPFLAGS) -frepo -c -o $@ $<
 
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) -c -o $@ $<

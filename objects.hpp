@@ -3,6 +3,11 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <string>
+
+class DeltaDB;
+
+using namespace std;
 
 class Pack;
 
@@ -18,12 +23,18 @@ public:
       fprintf( stderr, "%02x", hash[ i ] );
     }
   }
+  string str( void ) const
+  {
+    char *cstr = (char*) &(hash[0]);
+    string x( cstr, 20 );
+    return x;
+  }
 };
 
 class GitObject
 {
 private:
-  virtual void decode_delta_ptr( void ) = 0;
+  virtual void decode_delta_ptr( void ) {}
 
 protected:
   const Pack *pack;
@@ -33,6 +44,9 @@ protected:
   size_t size;
 
 public:
+  virtual void contents( void ) = 0;
+  virtual bool resolve( DeltaDB *db ) { return false; }
+
   static GitObject* make_object( const Pack *pack, off_t header_index, const sha1 hash );
 
   void init( const Pack *s_pack, off_t s_data_index, off_t s_header_index,
@@ -46,42 +60,67 @@ public:
 
     this->decode_delta_ptr();
   };
+
+  off_t get_header_index( void ) const { return header_index; }
+  const sha1* const get_hash( void ) const { return &hash; }
 };
 
 class Commit : public GitObject
 {
-  void decode_delta_ptr( void ) {}
+public:
+  void contents( void ) {}
 };
 
 class Tree : public GitObject
 {
-  void decode_delta_ptr( void ) {}
+public:
+  void contents( void ) {}
 };
 
 class Blob : public GitObject
 {
-  void decode_delta_ptr( void ) {}
+public:
+  void contents( void ) {}
 };
 
 class Tag : public GitObject
 {
-  void decode_delta_ptr( void ) {}
+public:
+  void contents( void ) {}
 };
 
 class Delta : public GitObject
 {
+protected:
+  GitObject *real_object;
+  GitObject *reference_object;
+
+public:
+  Delta() : real_object(0) {}
+  ~Delta() { if ( real_object ) { delete real_object; } }
+  GitObject* get_reference( void ) const { return reference_object; }
 };
 
 class Ofs_Delta : public Delta
 {
+private:
   off_t reference_header_index;
   void decode_delta_ptr( void );
+
+public:
+  bool resolve( DeltaDB *db );
+  void contents( void ) {}
 };
 
 class Ref_Delta : public Delta
 {
+private:
   sha1 reference;
   void decode_delta_ptr( void );
+
+public:
+  bool resolve( DeltaDB *db );
+  void contents( void ) {}
 };
 
 #endif
