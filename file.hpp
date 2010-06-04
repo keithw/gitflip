@@ -31,6 +31,14 @@ public:
     return ((uint32_t*)buffer)[ index ];
   }
 
+  uint8_t* get_buf( const off_t index, const size_t len ) const
+  {
+    assert( index >= 0 );
+    assert( index + len <= filesize );
+
+    return buffer + index;
+  }
+
   off_t get_filesize( void ) const { return filesize; }
 
   uint8_t operator[] ( const off_t index ) const { return byte( index ); }

@@ -68,15 +68,14 @@ void Ofs_Delta::decode_delta_ptr( void )
     negative_offset = ((negative_offset+1) << 7) + (byte & 0x7f);
   }
 
+  data_index = i;
   reference_header_index = header_index - negative_offset;
 }
 
 void Ref_Delta::decode_delta_ptr( void )
 {
-  /* Access will not necessarily be word-aligned here */
-  for ( int i = 0; i < 20; i++ ) {
-    reference.hash[ i ] = pack->byte( data_index + i );
-  }
+  memcpy( reference.hash, pack->get_buf( data_index, 20 ), 20 );
+  data_index += 20;
 }
 
 bool Ofs_Delta::resolve( DeltaDB *db )

@@ -4,7 +4,7 @@ executables = gitflip
 
 CPP = g++
 CPPFLAGS = -g -O2 --std=c++0x -pedantic -Werror -Wall -fno-implicit-templates -pipe -pthread -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=500 -D_GNU_SOURCE
-LIBS =
+LIBS = -lz
 
 all: $(executables)
 

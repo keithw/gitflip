@@ -5,6 +5,8 @@
 #include <string.h>
 #include <string>
 
+#include "exceptions.hpp"
+
 class DeltaDB;
 
 using namespace std;
@@ -44,12 +46,26 @@ protected:
   size_t size;
 
 public:
+  uint8_t *decoded_data;
+  uint8_t *delta_decoded_data;
+
+  GitObject( void )
+    : pack( NULL ), decoded_data( NULL ), delta_decoded_data( NULL )
+  {
+  }
+
+  ~GitObject( void )
+  {
+    assert( !decoded_data );
+  }
+
+  void alloc( void ) { decoded_data = new uint8_t[ size ]; }
+  void free( void ) { delete[] decoded_data; decoded_data = NULL; }
+
   virtual void contents( void ) = 0;
   virtual bool resolve( DeltaDB *db ) { return false; }
 
-  uint8_t *decoded_data;
-
-  void inflate( void );
+  void inflate_object( void );
   virtual void apply_delta( GitObject *parent ) {}
 
   static GitObject* make_object( const Pack *pack, off_t header_index, const sha1 hash );
@@ -69,8 +85,6 @@ public:
   off_t get_header_index( void ) const { return header_index; }
   const sha1* const get_hash( void ) const { return &hash; }
   size_t get_size( void ) const { return size; }
-
-  
 };
 
 class Commit : public GitObject
@@ -105,6 +119,7 @@ protected:
 public:
   Delta() : reference_object( NULL ) {}
   GitObject* get_reference( void ) const { return reference_object; }
+  void apply_delta( GitObject *parent );
 };
 
 class Ofs_Delta : public Delta

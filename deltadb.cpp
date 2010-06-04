@@ -68,13 +68,19 @@ int DeltaDB::recursive_traverse( GitObject *obj, GitObject *parent ) const
     children = child_map.equal_range( obj );
 
   int size = obj->get_size();
-  obj->inflate();
+
+  /* breadth-first would be more memory-efficient */
+  /* because we can free the first level as soon as we're done with it */
+
+  obj->alloc();
+  obj->inflate_object();
   obj->apply_delta( parent );
 
   for ( child_map_t::const_iterator i = children.first; i != children.second; i++ ) {
     GitObject *child = i->second;
     size += recursive_traverse( child, obj );
   }
+  obj->free();
 
   return size;
 }
