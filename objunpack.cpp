@@ -57,8 +57,8 @@ void Delta::apply_delta( GitObject *parent )
 
   /* Now apply deltas. Taken from git patch-delta.c */
   uint8_t *out = delta_decoded_data;
-  uint8_t *top = delta_decoded_data + delta_decoded_size;
-  uint8_t *data = decoded_data + i;
+  const uint8_t *top = decoded_data + size;
+  const uint8_t *data = decoded_data + i;
 
   while (data < top) {
     uint8_t cmd = *data++;
@@ -73,20 +73,21 @@ void Delta::apply_delta( GitObject *parent )
       if (cmd & 0x40) cp_size |= (*data++ << 16);
       if (cp_size == 0) cp_size = 0x10000;
       if (cp_off + cp_size < cp_size ||
-	  cp_off + cp_size > parent_size ||
-	  cp_size > size)
+	  cp_off + cp_size > parent->get_delta_decoded_size() ||
+	  cp_size > parent_size)
 	break;
       memcpy(out, (char *) parent->delta_decoded_data + cp_off, cp_size);
       out += cp_size;
-      size -= cp_size;
+      parent_size -= cp_size;
     } else if (cmd) {
-      if (cmd > size)
+      if (cmd > parent_size)
 	break;
       memcpy(out, data, cmd);
       out += cmd;
       data += cmd;
-      size -= cmd;
+      parent_size -= cmd;
     } else {
+      fprintf( stderr, "Error, cmd = 0\n" );
       throw InternalError();
     }
   }

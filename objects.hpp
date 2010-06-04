@@ -101,6 +101,15 @@ public:
   size_t get_size( void ) const { return size; }
   size_t get_delta_decoded_size( void ) const { return delta_decoded_size; }
 
+  uint8_t& operator[] ( const off_t index ) const
+  {
+    assert( delta_decoded_data );
+    assert( index >= 0 );
+    assert( index < delta_decoded_size );
+
+    return delta_decoded_data[ index ];
+  }
+
   virtual void parse( GitObject *obj ) = 0;
 };
 
