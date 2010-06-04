@@ -20,7 +20,7 @@ void Commit::parse( GitObject *obj, ArrowStore *arrows )
   /* we assume every commit has an author and commiter,
      so there's no way our search for "parent " will cause an
      exception for running off the end of the buffer */
-  int i = 46;
+  off_t i = 46;
   while ( 0 == strncmp( (char *)obj->get_buf( i, 7 ), "parent ", 7 ) ) {
     sha1 parent;
     parent.read( obj->get_buf( i + 7, 40 ) );
@@ -31,6 +31,29 @@ void Commit::parse( GitObject *obj, ArrowStore *arrows )
 
 void Tree::parse( GitObject *obj, ArrowStore *arrows )
 {
+  /* null bytes signal end of filename, and immediately precede SHA-1 */
+  /* note tree uses binary SHA-1, unlike ASCII form */
+
+  off_t i = 0;
+  while ( i < obj->get_delta_decoded_size() ) {
+    if ( (*obj)[ i ] == 0 ) {
+      if ( i + 21 > obj->get_delta_decoded_size() ) {
+	printf( "Zero found at byte %d of ", (int)i );
+	obj->get_hash()->print();
+	printf( "\n" );
+
+	for ( off_t q = i - 20; q < obj->get_delta_decoded_size(); q++ ) {
+	  printf( "%d (%c) ", (*obj)[ q ], (*obj)[ q ] );
+	}
+	printf( "\n" );
+      }
+      sha1 entry( (char *)(obj->get_buf( i + 1, 20 ) ) );
+      arrows->add( obj->get_hash()->str(), entry.str() );
+      i += 21;
+    } else {
+      i++;
+    }
+  }
 }
 
 void Tag::parse( GitObject *obj, ArrowStore *arrows )

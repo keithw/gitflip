@@ -33,12 +33,12 @@ File::File( char *filename )
 
   /* Preload contents to help Linux VM */
   /* It's unfortunate this is a speedup */
-  /*
+
   volatile uint8_t sum = 0;
   for ( int i = 0; i < filesize; i++ ) {
     sum |= buffer[ i ];
   }
-  */
+    
 }
 
 File::~File()

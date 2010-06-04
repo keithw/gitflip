@@ -25,7 +25,10 @@ int main( int argc, char *argv[] )
 
     deltas->traverse_all();
 
-    fprintf( stderr, "Freeing temporary memory... " );
+    printf( "Number of arrows: %d.\n", arrows->get_size() );
+
+    fprintf( stderr, "Freeing memory... " );
+    delete arrows;
     delete deltas;
     delete pack;
     fprintf( stderr, "done.\n" );
@@ -33,10 +36,6 @@ int main( int argc, char *argv[] )
     cout << e->str();
     return 1;
   }
-
-  printf( "Arrows: %d.\n", arrows->get_size() );
-
-  delete arrows;
 
   return 0;
 }
