@@ -1,6 +1,3 @@
-#ifndef OBJUNPACK_HPP
-#define OBJUNPACK_HPP
-
 #include <zlib.h>
 
 #include "objects.hpp"
@@ -22,15 +19,75 @@ void GitObject::inflate_object( void )
   zstr.avail_out = size;
 
   assert( inflateInit( &zstr ) == Z_OK );
-  
   assert( inflate( &zstr, Z_FINISH ) == Z_STREAM_END );
-
   assert( inflateEnd( &zstr ) == Z_OK );
+  
+  post_inflate_hook();
 }
 
 void Delta::apply_delta( GitObject *parent )
 {
+  assert( parent );
 
+  /* First syntax element in delta format: parent size */
+  off_t i = 0;
+  size_t parent_size = 0;
+  int shift = 0;
+  while ( i < size ) {
+    uint8_t byte = decoded_data[ i++ ];
+    parent_size |= (byte & 0x7f) << shift;
+    shift += 7;
+    if ( !(byte & 0x80) ) break;
+  }
+
+  assert( parent_size == parent->get_delta_decoded_size() );
+
+  /* Next syntax element: our target size */
+  size_t target_size = 0;
+  shift = 0;
+  while ( i < size ) {
+    uint8_t byte = decoded_data[ i++ ];
+    target_size |= (byte & 0x7f) << shift;
+    shift += 7;
+    if ( !(byte & 0x80) ) break;
+  }
+
+  delta_decoded_size = target_size;
+  delta_decoded_data = new uint8_t[ delta_decoded_size ];
+
+  /* Now apply deltas. Taken from git patch-delta.c */
+  uint8_t *out = delta_decoded_data;
+  uint8_t *top = delta_decoded_data + delta_decoded_size;
+  uint8_t *data = decoded_data + i;
+
+  while (data < top) {
+    uint8_t cmd = *data++;
+    if (cmd & 0x80) {
+      unsigned long cp_off = 0, cp_size = 0;
+      if (cmd & 0x01) cp_off = *data++;
+      if (cmd & 0x02) cp_off |= (*data++ << 8);
+      if (cmd & 0x04) cp_off |= (*data++ << 16);
+      if (cmd & 0x08) cp_off |= ((unsigned) *data++ << 24);
+      if (cmd & 0x10) cp_size = *data++;
+      if (cmd & 0x20) cp_size |= (*data++ << 8);
+      if (cmd & 0x40) cp_size |= (*data++ << 16);
+      if (cp_size == 0) cp_size = 0x10000;
+      if (cp_off + cp_size < cp_size ||
+	  cp_off + cp_size > parent_size ||
+	  cp_size > size)
+	break;
+      memcpy(out, (char *) parent->delta_decoded_data + cp_off, cp_size);
+      out += cp_size;
+      size -= cp_size;
+    } else if (cmd) {
+      if (cmd > size)
+	break;
+      memcpy(out, data, cmd);
+      out += cmd;
+      data += cmd;
+      size -= cmd;
+    } else {
+      throw InternalError();
+    }
+  }
 }
-
-#endif

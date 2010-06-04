@@ -1,5 +1,5 @@
-source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp templates.cpp objunpack.cpp
-objects = file.o pack.o index.o exceptions.o objects.o deltadb.o templates.o objunpack.o
+source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp templates.cpp objunpack.cpp objparse.cpp
+objects = file.o pack.o index.o exceptions.o objects.o deltadb.o templates.o objunpack.o objparse.o
 executables = gitflip
 
 CPP = g++

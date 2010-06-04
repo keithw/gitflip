@@ -23,7 +23,7 @@ private:
   child_map_t child_map;
   base_map_t base_map;
 
-  int recursive_traverse( GitObject *obj, GitObject *parent ) const;
+  int recursive_traverse( GitObject *obj, GitObject *parent, GitObject *base ) const;
 
 public:
   DeltaDB( Pack *pack );

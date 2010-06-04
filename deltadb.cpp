@@ -49,7 +49,7 @@ unsigned int DeltaDB::traverse_all( void ) const {
     if ( (typeid( *obj ) == typeid( Commit ))
 	 || (typeid( *obj ) == typeid( Tree ))
 	 || (typeid( *obj ) == typeid( Tag )) ) {
-      size += recursive_traverse( obj, NULL );
+      size += recursive_traverse( obj, NULL, obj );
     } else if ( typeid( *obj ) == typeid( Blob ) ) {
       /* do nothing */
     } else {
@@ -62,12 +62,10 @@ unsigned int DeltaDB::traverse_all( void ) const {
   return size;
 }
 
-int DeltaDB::recursive_traverse( GitObject *obj, GitObject *parent ) const
+int DeltaDB::recursive_traverse( GitObject *obj, GitObject *parent, GitObject *base ) const
 {
   std::pair< child_map_t::const_iterator, child_map_t::const_iterator >
     children = child_map.equal_range( obj );
-
-  int size = obj->get_size();
 
   /* breadth-first would be more memory-efficient */
   /* because we can free the first level as soon as we're done with it */
@@ -76,9 +74,13 @@ int DeltaDB::recursive_traverse( GitObject *obj, GitObject *parent ) const
   obj->inflate_object();
   obj->apply_delta( parent );
 
+  base->parse( obj );
+
+  int size = obj->get_delta_decoded_size();
+
   for ( child_map_t::const_iterator i = children.first; i != children.second; i++ ) {
     GitObject *child = i->second;
-    size += recursive_traverse( child, obj );
+    size += recursive_traverse( child, obj, base );
   }
   obj->free();
 

@@ -44,6 +44,13 @@ protected:
   off_t data_index;
   off_t header_index;
   size_t size;
+  size_t delta_decoded_size;
+
+  virtual void post_inflate_hook( void )
+  {
+    delta_decoded_size = size;
+    delta_decoded_data = decoded_data;
+  }
 
 public:
   uint8_t *decoded_data;
@@ -56,13 +63,20 @@ public:
 
   ~GitObject( void )
   {
+    assert( !delta_decoded_data );
     assert( !decoded_data );
   }
 
   void alloc( void ) { decoded_data = new uint8_t[ size ]; }
-  void free( void ) { delete[] decoded_data; decoded_data = NULL; }
+  void free( void ) {
+    delete[] decoded_data;
+    if ( delta_decoded_data && (delta_decoded_data != decoded_data) ) {
+      delete[] delta_decoded_data;
+    }
+    decoded_data = NULL;
+    delta_decoded_data = NULL;
+  }
 
-  virtual void contents( void ) = 0;
   virtual bool resolve( DeltaDB *db ) { return false; }
 
   void inflate_object( void );
@@ -78,37 +92,40 @@ public:
     header_index = s_header_index;
     hash = s_hash;
     size = s_size;
-
+    
     this->decode_delta_ptr();
   };
 
   off_t get_header_index( void ) const { return header_index; }
   const sha1* const get_hash( void ) const { return &hash; }
   size_t get_size( void ) const { return size; }
+  size_t get_delta_decoded_size( void ) const { return delta_decoded_size; }
+
+  virtual void parse( GitObject *obj ) = 0;
 };
 
 class Commit : public GitObject
 {
 public:
-  void contents( void ) {}
+  void parse( GitObject *obj );
 };
 
 class Tree : public GitObject
 {
 public:
-  void contents( void ) {}
+  void parse( GitObject *obj );
 };
 
 class Blob : public GitObject
 {
 public:
-  void contents( void ) {}
+  void parse( GitObject *obj );
 };
 
 class Tag : public GitObject
 {
 public:
-  void contents( void ) {}
+  void parse( GitObject *obj );
 };
 
 class Delta : public GitObject
@@ -116,10 +133,16 @@ class Delta : public GitObject
 protected:
   GitObject *reference_object;
 
+  void post_inflate_hook( void )
+  {
+    delta_decoded_size = 0;
+  }
+
 public:
   Delta() : reference_object( NULL ) {}
   GitObject* get_reference( void ) const { return reference_object; }
   void apply_delta( GitObject *parent );
+  void parse( GitObject *obj );
 };
 
 class Ofs_Delta : public Delta
@@ -130,7 +153,6 @@ private:
 
 public:
   bool resolve( DeltaDB *db );
-  void contents( void ) {}
 };
 
 class Ref_Delta : public Delta
@@ -141,7 +163,6 @@ private:
 
 public:
   bool resolve( DeltaDB *db );
-  void contents( void ) {}
 };
 
 #endif
