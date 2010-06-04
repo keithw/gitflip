@@ -27,11 +27,11 @@ public:
   uint32_t word ( const off_t index ) const
   {
     assert( index >= 0 );
-    assert( (index + 1) * sizeof( uint32_t ) <= filesize );
+    assert( (off_t)sizeof( uint32_t ) * (index + 1) <= filesize );
     return ((uint32_t*)buffer)[ index ];
   }
 
-  uint8_t* get_buf( const off_t index, const size_t len ) const
+  uint8_t* get_buf( const off_t index, const off_t len ) const
   {
     assert( index >= 0 );
     assert( index + len <= filesize );

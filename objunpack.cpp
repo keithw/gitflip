@@ -31,9 +31,9 @@ void Delta::apply_delta( GitObject *parent )
 
   /* First syntax element in delta format: parent size */
   off_t i = 0;
-  size_t parent_size = 0;
+  off_t parent_size = 0;
   int shift = 0;
-  while ( i < size ) {
+  while ( i < (off_t)size ) {
     uint8_t byte = decoded_data[ i++ ];
     parent_size |= (byte & 0x7f) << shift;
     shift += 7;
@@ -43,9 +43,9 @@ void Delta::apply_delta( GitObject *parent )
   assert( parent_size == parent->get_delta_decoded_size() );
 
   /* Next syntax element: our target size */
-  size_t target_size = 0;
+  off_t target_size = 0;
   shift = 0;
-  while ( i < size ) {
+  while ( i < (off_t)size ) {
     uint8_t byte = decoded_data[ i++ ];
     target_size |= (byte & 0x7f) << shift;
     shift += 7;
@@ -61,12 +61,12 @@ void Delta::apply_delta( GitObject *parent )
   const uint8_t *data = decoded_data + i;
   const uint8_t *top = decoded_data + size;
 
-  size_t size_tmp = target_size;
+  off_t size_tmp = target_size;
 
   while (data < top) {
     uint8_t cmd = *data++;
     if (cmd & 0x80) {
-      unsigned long cp_off = 0, cp_size = 0;
+      off_t cp_off = 0, cp_size = 0;
       if (cmd & 0x01) cp_off = *data++;
       if (cmd & 0x02) cp_off |= (*data++ << 8);
       if (cmd & 0x04) cp_off |= (*data++ << 16);

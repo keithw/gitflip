@@ -53,8 +53,8 @@ protected:
   sha1 hash;
   off_t data_index;
   off_t header_index;
-  size_t size;
-  size_t delta_decoded_size;
+  off_t size;
+  off_t delta_decoded_size;
 
   virtual void post_inflate_hook( void )
   {
@@ -108,8 +108,8 @@ public:
 
   off_t get_header_index( void ) const { return header_index; }
   const sha1* const get_hash( void ) const { return &hash; }
-  size_t get_size( void ) const { return size; }
-  size_t get_delta_decoded_size( void ) const { return delta_decoded_size; }
+  off_t get_size( void ) const { return size; }
+  off_t get_delta_decoded_size( void ) const { return delta_decoded_size; }
 
   uint8_t operator[] ( const off_t index ) const
   {
@@ -120,11 +120,11 @@ public:
     return delta_decoded_data[ index ];
   }
 
-  const uint8_t* get_buf( const off_t index, const size_t len ) const
+  const uint8_t* get_buf( const off_t index, const off_t len ) const
   {
     assert( delta_decoded_data );
     assert( index >= 0 );
-    assert( index + len <= delta_decoded_size );
+    assert( (index + len) <= delta_decoded_size );
 
     return delta_decoded_data + index;
   }
