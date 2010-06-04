@@ -17,17 +17,15 @@ int main( int argc, char *argv[] )
   char *pack_filename = argv[ 1 ];
   char *idx_filename = argv[ 2 ];
 
+  ArrowStore *arrows = new ArrowStore();
+
   try {
-    ArrowStore *arrows = new ArrowStore();
     Pack *pack = new Pack( pack_filename, idx_filename );
     DeltaDB *deltas = new DeltaDB( pack, arrows );
 
     deltas->traverse_all();
 
-    printf( "Number of arrows: %d.\n", arrows->get_size() );
-
     fprintf( stderr, "Freeing memory... " );
-    delete arrows;
     delete deltas;
     delete pack;
     fprintf( stderr, "done.\n" );
@@ -35,6 +33,12 @@ int main( int argc, char *argv[] )
     cout << e->str();
     return 1;
   }
+
+  printf( "Number of arrows: %d.\n", arrows->get_size() );
+
+  sleep( 10 );
+
+  delete arrows;
 
   return 0;
 }

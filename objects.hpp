@@ -27,6 +27,7 @@ public:
       printf( "%02x", hash[ i ] );
     }
   }
+  
   void read( const uint8_t *ascii )
   {
     for ( int i = 0; i < 20; i++ ) {
@@ -35,10 +36,10 @@ public:
       hash[ i ] = byte;
     }
   }
-  string str( void ) const
+  const string str( void ) const
   {
     char *cstr = (char*) &(hash[0]);
-    string x( cstr, 20 );
+    const string x( cstr, 20 );
     return x;
   }
 };
@@ -129,31 +130,31 @@ public:
     return delta_decoded_data + index;
   }
 
-  virtual void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db ) = 0;
+  virtual void parse( GitObject *obj, ArrowStore *arrows ) = 0;
 };
 
 class Commit : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Tree : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Blob : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Tag : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Delta : public GitObject
@@ -170,7 +171,7 @@ public:
   Delta() : reference_object( NULL ) {}
   GitObject* get_reference( void ) const { return reference_object; }
   void apply_delta( GitObject *parent );
-  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Ofs_Delta : public Delta

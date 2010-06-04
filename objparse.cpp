@@ -9,13 +9,13 @@
    based on its type. (A delta doesn't know its own type.)
 */
 
-void Commit::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
+void Commit::parse( GitObject *obj, ArrowStore *arrows )
 {
   /* confirm "tree" */
   unixassert( strncmp( (char *)obj->get_buf( 0, 5 ), "tree ", 5 ) );
   sha1 tree;
   tree.read( obj->get_buf( 5, 40 ) );
-  arrows->add( obj, db->lookup_hash( tree ) );
+  arrows->add( *(obj->get_hash()), tree );
 
   /* get as many parents as are present */
   /* we assume every commit has an author and commiter,
@@ -25,12 +25,12 @@ void Commit::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
   while ( 0 == strncmp( (char *)obj->get_buf( i, 7 ), "parent ", 7 ) ) {
     sha1 parent;
     parent.read( obj->get_buf( i + 7, 40 ) );
-    arrows->add( obj, db->lookup_hash( parent ) );
+    arrows->add( *(obj->get_hash()), parent );
     i += 48;
   }
 }
 
-void Tree::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
+void Tree::parse( GitObject *obj, ArrowStore *arrows )
 {
   /* null bytes signal end of filename, and immediately precede SHA-1 */
   /* note tree uses binary SHA-1, unlike ASCII form */
@@ -49,7 +49,7 @@ void Tree::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
 	printf( "\n" );
       }
       sha1 entry( (char *)(obj->get_buf( i + 1, 20 ) ) );
-      arrows->add( obj, db->lookup_hash( entry ) );
+      arrows->add( *(obj->get_hash()), entry );
       i += 21;
     } else {
       i++;
@@ -57,23 +57,23 @@ void Tree::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
   }
 }
 
-void Tag::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
+void Tag::parse( GitObject *obj, ArrowStore *arrows )
 {
   /* confirm beginning */
   unixassert( strncmp( (char *)obj->get_buf( 0, 7 ), "object ", 7 ) );
 
   sha1 reference;
   reference.read( obj->get_buf( 7, 40 ) );
-  arrows->add( obj, db->lookup_hash( reference ) );
+  arrows->add( *(obj->get_hash()), reference );
 }
 
-void Blob::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
+void Blob::parse( GitObject *obj, ArrowStore *arrows )
 {
   /* We're not interested in these. */
   throw InternalError();
 }
 
-void Delta::parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db )
+void Delta::parse( GitObject *obj, ArrowStore *arrows )
 {
   /* Delta should never be the base of a delta chain. */
   throw InternalError();

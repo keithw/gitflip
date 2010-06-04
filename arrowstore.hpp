@@ -3,55 +3,57 @@
 
 #include <google/sparse_hash_map>
 #include <google/sparse_hash_set>
+#include <string>
+
+using namespace std;
 
 using google::sparse_hash_map;
 using google::sparse_hash_set;
 using std::tr1::hash;
 
-class GitObject;
+#include "objects.hpp"
 
-struct eqptr
+struct eqint
 {
-  bool operator() ( const GitObject *x, const GitObject *y ) const
+  bool operator() ( const uint32_t x, const uint32_t y ) const
   {
     return (x == y);
   }
 };
 
-typedef sparse_hash_set<const GitObject *, std::tr1::hash<const GitObject *>, eqptr> object_set_t;
+struct eqstr
+{
+  bool operator() ( const sha1 s1, const sha1 s2 ) const
+  {
+    return (0 == memcmp( s1.hash, s2.hash, 20 ));
+  }
+};
 
-typedef sparse_hash_map<const GitObject *, object_set_t, std::tr1::hash<const GitObject *>, eqptr> arrow_map_t;
+struct hasher
+{
+  size_t operator() ( const sha1 x ) const
+  {
+    return (x.hash[ 0 ] << 24) | (x.hash[ 1 ] << 16) | (x.hash[ 2 ] << 8 ) | x.hash[ 3 ];
+  }
+};
+
+typedef sparse_hash_map<sha1, uint32_t, hasher, eqstr> id_map_t;
 
 class ArrowStore
 {
 private:
-  arrow_map_t arrow_map;
+  id_map_t id_map;
+  int next_id;
+
+  vector< vector<uint32_t> > arrows;
 
 public:
-  ArrowStore( void ) { /* arrow_map.set_empty_key( NULL ); */ }
+  ArrowStore( void ) { next_id = 0; }
   ~ArrowStore() {}
 
-  void add( GitObject *src, GitObject *dest )
-  {
-    arrow_map_t::iterator i = arrow_map.find( dest );
-    if ( i == arrow_map.end() ) {
-      object_set_t set;
-      //      set.set_empty_key( NULL );
-      set.insert( src );
-      arrow_map.insert( arrow_map_t::value_type( dest, set ) );
-    } else {
-      i->second.insert( src );
-    }
-  }
+  void add( const sha1 src, const sha1 dest );
 
-  int get_size( void ) const
-  {
-    int size = 0;
-    for ( arrow_map_t::const_iterator i = arrow_map.begin(); i != arrow_map.end(); i++ ) {
-      size += i->second.size();
-    }
-    return size;
-  }
+  int get_size( void ) const;
 };
 
 #endif

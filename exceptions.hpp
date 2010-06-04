@@ -53,6 +53,8 @@ void warn( const char *assertion, const char *file, int line, const char *functi
 	       throw new UnixAssertError( __STRING(expr), __FILE__, __LINE__, __PRETTY_FUNCTION__, assertion_result, errno ); \
 	     } } while ( 0 )
 
+#undef assert
+
 #define assert(expr)							\
 	   ((expr)							\
 	    ? (void)0							\
