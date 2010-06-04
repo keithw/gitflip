@@ -7,7 +7,9 @@
 using namespace std;
 using namespace std::tr1;
 
-typedef unordered_multimap<string, string> arrow_map_t;
+class GitObject;
+
+typedef unordered_multimap<GitObject *, GitObject *> arrow_map_t;
 
 class ArrowStore
 {
@@ -18,7 +20,7 @@ public:
   ArrowStore( void ) {}
   ~ArrowStore() {}
 
-  void add( string src, string dest )
+  void add( GitObject *src, GitObject *dest )
   {
     arrow_map.insert( arrow_map_t::value_type( dest, src ) );
   }

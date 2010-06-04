@@ -76,7 +76,7 @@ int DeltaDB::recursive_traverse( GitObject *obj, GitObject *parent, GitObject *b
   obj->inflate_object();
   obj->apply_delta( parent );
 
-  base->parse( obj, arrows );
+  base->parse( obj, arrows, this );
 
   int size = obj->get_delta_decoded_size();
 

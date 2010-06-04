@@ -129,31 +129,31 @@ public:
     return delta_decoded_data + index;
   }
 
-  virtual void parse( GitObject *obj, ArrowStore *arrows ) = 0;
+  virtual void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db ) = 0;
 };
 
 class Commit : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows );
+  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
 };
 
 class Tree : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows );
+  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
 };
 
 class Blob : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows );
+  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
 };
 
 class Tag : public GitObject
 {
 public:
-  void parse( GitObject *obj, ArrowStore *arrows );
+  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
 };
 
 class Delta : public GitObject
@@ -170,7 +170,7 @@ public:
   Delta() : reference_object( NULL ) {}
   GitObject* get_reference( void ) const { return reference_object; }
   void apply_delta( GitObject *parent );
-  void parse( GitObject *obj, ArrowStore *arrows );
+  void parse( GitObject *obj, ArrowStore *arrows, const DeltaDB *db );
 };
 
 class Ofs_Delta : public Delta

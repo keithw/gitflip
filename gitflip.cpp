@@ -17,9 +17,8 @@ int main( int argc, char *argv[] )
   char *pack_filename = argv[ 1 ];
   char *idx_filename = argv[ 2 ];
 
-  ArrowStore *arrows = new ArrowStore();
-
   try {
+    ArrowStore *arrows = new ArrowStore();
     Pack *pack = new Pack( pack_filename, idx_filename );
     DeltaDB *deltas = new DeltaDB( pack, arrows );
 
