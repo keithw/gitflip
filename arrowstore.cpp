@@ -38,3 +38,29 @@ int ArrowStore::get_size( void ) const
 
   return size;
 }
+
+void ArrowStore::writeout( void )
+{
+  FILE *hash = fopen( "GITFLIP_DB.index", "w" );
+  assert( hash );
+
+  id_map.write_metadata( hash );
+  id_map.write_nopointer_data( hash );
+
+  unixassert( fclose( hash ) );
+
+  FILE *arrowfile = fopen( "GITFLIP_DB.data", "w" );
+  assert( arrowfile );
+
+  for ( size_t i = 0; i < arrows.size(); i++ ) {
+    uint32_t vector_len = arrows.at( i ).size();
+    fwrite( &vector_len, sizeof( uint32_t ), 1, arrowfile );
+
+    for ( size_t j = 0; j < vector_len; j++ ) {
+      uint32_t val = arrows.at( i ).at( j );
+      fwrite( &val, sizeof( uint32_t ), 1, arrowfile );
+    }
+  }
+
+  unixassert( fclose( arrowfile ) );
+}

@@ -54,6 +54,8 @@ public:
   void add( const sha1 src, const sha1 dest );
 
   int get_size( void ) const;
+
+  void writeout( void );
 };
 
 #endif

@@ -36,7 +36,7 @@ int main( int argc, char *argv[] )
 
   printf( "Number of arrows: %d.\n", arrows->get_size() );
 
-  sleep( 10 );
+  arrows->writeout();
 
   delete arrows;
 
