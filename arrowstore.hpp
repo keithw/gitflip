@@ -1,11 +1,11 @@
 #ifndef ARROWSTORE_HPP
 #define ARROWSTORE_HPP
 
-#include <google/dense_hash_map>
-#include <google/dense_hash_set>
+#include <google/sparse_hash_map>
+#include <google/sparse_hash_set>
 
-using google::dense_hash_map;
-using google::dense_hash_set;
+using google::sparse_hash_map;
+using google::sparse_hash_set;
 using std::tr1::hash;
 
 class GitObject;
@@ -18,9 +18,9 @@ struct eqptr
   }
 };
 
-typedef dense_hash_set<const GitObject *, std::tr1::hash<const GitObject *>, eqptr> object_set_t;
+typedef sparse_hash_set<const GitObject *, std::tr1::hash<const GitObject *>, eqptr> object_set_t;
 
-typedef dense_hash_map<const GitObject *, object_set_t, std::tr1::hash<const GitObject *>, eqptr> arrow_map_t;
+typedef sparse_hash_map<const GitObject *, object_set_t, std::tr1::hash<const GitObject *>, eqptr> arrow_map_t;
 
 class ArrowStore
 {
@@ -28,7 +28,7 @@ private:
   arrow_map_t arrow_map;
 
 public:
-  ArrowStore( void ) { arrow_map.set_empty_key( NULL ); }
+  ArrowStore( void ) { /* arrow_map.set_empty_key( NULL ); */ }
   ~ArrowStore() {}
 
   void add( GitObject *src, GitObject *dest )
@@ -36,7 +36,7 @@ public:
     arrow_map_t::iterator i = arrow_map.find( dest );
     if ( i == arrow_map.end() ) {
       object_set_t set;
-      set.set_empty_key( NULL );
+      //      set.set_empty_key( NULL );
       set.insert( src );
       arrow_map.insert( arrow_map_t::value_type( dest, set ) );
     } else {
