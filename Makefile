@@ -1,5 +1,5 @@
-source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp templates.cpp objunpack.cpp objparse.cpp
-objects = file.o pack.o index.o exceptions.o objects.o deltadb.o templates.o objunpack.o objparse.o
+source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp templates.cpp objunpack.cpp objparse.cpp arrowstore.cpp
+objects = file.o pack.o index.o exceptions.o objects.o deltadb.o templates.o objunpack.o objparse.o arrowstore.o
 executables = gitflip
 
 CPP = g++
@@ -12,6 +12,9 @@ gitflip: gitflip.o $(objects)
 	$(CPP) $(CPPFLAGS) -o $@ $+ $(LIBS)
 
 deltadb.o: deltadb.cpp
+	$(CPP) $(CPPFLAGS) -frepo -c -o $@ $<
+
+arrowstore.o: arrowstore.cpp
 	$(CPP) $(CPPFLAGS) -frepo -c -o $@ $<
 
 %.o: %.cpp

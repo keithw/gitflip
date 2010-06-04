@@ -4,8 +4,10 @@
 #include "deltadb.hpp"
 #include "objects.hpp"
 
-DeltaDB::DeltaDB( Pack *pack )
+DeltaDB::DeltaDB( Pack *pack, ArrowStore *s_arrows )
 {
+  arrows = s_arrows;
+
   /* Track all the objects in the pack file */
   fprintf( stderr, "Ingesting objects... " );
   for ( unsigned int i = 0; i < pack->get_object_count(); i++ ) {
@@ -41,7 +43,7 @@ DeltaDB::DeltaDB( Pack *pack )
 
 unsigned int DeltaDB::traverse_all( void ) const {
   /* Follow all base objects (non-deltas) to deltas */
-  fprintf( stderr, "Traversing all delta chains... " );
+  fprintf( stderr, "Parsing all tree-ish objects... " );
 
   unsigned int size = 0;
   for ( base_map_t::const_iterator i = base_map.begin(); i != base_map.end(); i++ ) {
@@ -74,7 +76,7 @@ int DeltaDB::recursive_traverse( GitObject *obj, GitObject *parent, GitObject *b
   obj->inflate_object();
   obj->apply_delta( parent );
 
-  base->parse( obj );
+  base->parse( obj, arrows );
 
   int size = obj->get_delta_decoded_size();
 

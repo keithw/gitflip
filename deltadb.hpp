@@ -7,6 +7,8 @@
 #include "objects.hpp"
 #include "pack.hpp"
 
+class ArrowStore;
+
 using namespace std;
 using namespace std::tr1;
 
@@ -22,11 +24,12 @@ private:
   index_map_t index_map;
   child_map_t child_map;
   base_map_t base_map;
+  ArrowStore *arrows;
 
   int recursive_traverse( GitObject *obj, GitObject *parent, GitObject *base ) const;
 
 public:
-  DeltaDB( Pack *pack );
+  DeltaDB( Pack *pack, ArrowStore *s_arrows );
   ~DeltaDB();
 
   GitObject* lookup_hash( const sha1 hash ) const;

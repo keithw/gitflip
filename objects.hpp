@@ -8,6 +8,7 @@
 #include "exceptions.hpp"
 
 class DeltaDB;
+class ArrowStore;
 
 using namespace std;
 
@@ -20,9 +21,18 @@ public:
   sha1( const sha1 &source ) { memcpy( hash, source.hash, 20 ); }
   sha1( const char *s_hash ) { memcpy( hash, s_hash, 20 ); }
   sha1() {}
-  void print( void ) const {
+  void print( void ) const
+  {
     for ( int i = 0; i < 20; i++ ) {
       printf( "%02x", hash[ i ] );
+    }
+  }
+  void read( const uint8_t *ascii )
+  {
+    for ( int i = 0; i < 20; i++ ) {
+      unsigned int byte;
+      assert( 1 == sscanf( (char *)ascii + 2 * i, "%02x", &byte ) );
+      hash[ i ] = byte;
     }
   }
   string str( void ) const
@@ -110,31 +120,39 @@ public:
     return delta_decoded_data[ index ];
   }
 
-  virtual void parse( GitObject *obj ) = 0;
+  const uint8_t* get_buf( const off_t index, const size_t len ) const
+  {
+    assert( index >= 0 );
+    assert( index + len <= delta_decoded_size );
+
+    return delta_decoded_data + index;
+  }
+
+  virtual void parse( GitObject *obj, ArrowStore *arrows ) = 0;
 };
 
 class Commit : public GitObject
 {
 public:
-  void parse( GitObject *obj );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Tree : public GitObject
 {
 public:
-  void parse( GitObject *obj );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Blob : public GitObject
 {
 public:
-  void parse( GitObject *obj );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Tag : public GitObject
 {
 public:
-  void parse( GitObject *obj );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Delta : public GitObject
@@ -151,7 +169,7 @@ public:
   Delta() : reference_object( NULL ) {}
   GitObject* get_reference( void ) const { return reference_object; }
   void apply_delta( GitObject *parent );
-  void parse( GitObject *obj );
+  void parse( GitObject *obj, ArrowStore *arrows );
 };
 
 class Ofs_Delta : public Delta
