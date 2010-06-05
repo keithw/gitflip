@@ -1,4 +1,5 @@
 #include "arrowstore.hpp"
+#include "exceptions.hpp"
 
 void ArrowStore::add( const sha1 src, const sha1 dest )
 {
@@ -9,6 +10,7 @@ void ArrowStore::add( const sha1 src, const sha1 dest )
   if ( i == id_map.end() ) {
     src_id = next_id++;
     id_map[ src ] = src_id;
+    sha_map[ src_id ] = src;
   } else {
     src_id = i->second;
   }
@@ -17,6 +19,7 @@ void ArrowStore::add( const sha1 src, const sha1 dest )
   if ( j == id_map.end() ) {
     dest_id = next_id++;
     id_map[ dest ] = dest_id;
+    sha_map[ dest_id ] = dest;
   } else {
     dest_id = j->second;
   }
@@ -41,13 +44,21 @@ int ArrowStore::get_size( void ) const
 
 void ArrowStore::writeout( void )
 {
-  FILE *hash = fopen( "GITFLIP_DB.index", "w" );
-  assert( hash );
+  FILE *alfa = fopen( "GITFLIP_DB.alfa", "w" );
+  assert( alfa );
 
-  id_map.write_metadata( hash );
-  id_map.write_nopointer_data( hash );
+  id_map.write_metadata( alfa );
+  id_map.write_nopointer_data( alfa );
 
-  unixassert( fclose( hash ) );
+  unixassert( fclose( alfa ) );
+
+  FILE *beta = fopen( "GITFLIP_DB.beta", "w" );
+  assert( beta );
+
+  sha_map.write_metadata( beta );
+  sha_map.write_nopointer_data( beta );
+
+  unixassert( fclose( beta ) );
 
   FILE *arrowfile = fopen( "GITFLIP_DB.data", "w" );
   assert( arrowfile );

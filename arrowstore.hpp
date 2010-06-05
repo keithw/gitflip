@@ -5,13 +5,19 @@
 #include <google/sparse_hash_set>
 #include <string>
 
+#include "sha1.hpp"
+
 using namespace std;
 
 using google::sparse_hash_map;
-using google::sparse_hash_set;
-using std::tr1::hash;
 
-#include "objects.hpp"
+struct eqsha
+{
+  bool operator() ( const sha1 s1, const sha1 s2 ) const
+  {
+    return (0 == memcmp( s1.hash, s2.hash, 20 ));
+  }
+};
 
 struct eqint
 {
@@ -21,15 +27,8 @@ struct eqint
   }
 };
 
-struct eqstr
-{
-  bool operator() ( const sha1 s1, const sha1 s2 ) const
-  {
-    return (0 == memcmp( s1.hash, s2.hash, 20 ));
-  }
-};
-
-struct hasher
+/* The first 32 bits of a SHA-1 are a fine hash for the whole thing */
+struct sha_hash
 {
   size_t operator() ( const sha1 x ) const
   {
@@ -37,12 +36,23 @@ struct hasher
   }
 };
 
-typedef sparse_hash_map<sha1, uint32_t, hasher, eqstr> id_map_t;
+struct int_hash
+{
+  size_t operator() ( const uint32_t x ) const
+  {
+    return (size_t) x;
+  }
+};
+
+typedef sparse_hash_map<sha1, uint32_t, sha_hash, eqsha> id_map_t;
+typedef sparse_hash_map<uint32_t, sha1, int_hash, eqint> sha_map_t;
 
 class ArrowStore
 {
 private:
   id_map_t id_map;
+  sha_map_t sha_map;
+
   int next_id;
 
   vector< vector<uint32_t> > arrows;
