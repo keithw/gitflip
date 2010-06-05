@@ -84,16 +84,20 @@ void ArrowStore::readin( void )
   FILE *alfa = fopen( "GITFLIP_DB.alfa", "r" );
   assert( alfa );
 
+  fprintf( stderr, "Reading hash-to-id mapping... " );
   assert( id_map.read_metadata( alfa ) );
   assert( id_map.read_nopointer_data( alfa ) );
+  fprintf( stderr, "done.\n" );
 
   unixassert( fclose( alfa ) );
 
   FILE *beta = fopen( "GITFLIP_DB.beta", "r" );
   assert( beta );
 
+  fprintf( stderr, "Reading id-to-hash mapping... " );
   assert( sha_map.read_metadata( beta ) );
   assert( sha_map.read_nopointer_data( beta ) );
+  fprintf( stderr, "done.\n" );
 
   unixassert( fclose( beta ) );
 
@@ -101,6 +105,7 @@ void ArrowStore::readin( void )
   assert( arrowfile );
 
   uint32_t total_size;
+  fprintf( stderr, "Reading arrows... " );
   assert( 1 == fread( &total_size, sizeof( uint32_t ), 1, arrowfile ) );
 
   arrows.resize( total_size );
@@ -120,6 +125,9 @@ void ArrowStore::readin( void )
       arrow_count++;
     }
   }
+
+  fprintf( stderr, "done.\n" );
+  unixassert( fclose( arrowfile ) );
 
   fprintf( stderr, "Number of arrows: %d\n", arrow_count );
 }
