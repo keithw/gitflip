@@ -3,6 +3,9 @@
 #include "arrowstore.hpp"
 #include "exceptions.hpp"
 
+/* Query program. Takes ASCII SHA-1's (followed by newline) on stdin,
+   and prints out the objects that depend on the given object. */
+
 int main( void )
 {
   ArrowStore *arrows = new ArrowStore();

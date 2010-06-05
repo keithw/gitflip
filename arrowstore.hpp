@@ -68,6 +68,12 @@ public:
 
   void writeout( void );
   void readin( void );
+
+  void resize( size_t n )
+  {
+    id_map.resize( n );
+    sha_map.resize( n );
+  }
 };
 
 #endif
