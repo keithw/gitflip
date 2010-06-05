@@ -62,10 +62,12 @@ public:
   ~ArrowStore() {}
 
   void add( const sha1 src, const sha1 dest );
+  vector<sha1> query( const sha1 hash ) const;
 
   int get_size( void ) const;
 
   void writeout( void );
+  void readin( void );
 };
 
 #endif

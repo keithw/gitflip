@@ -1,12 +1,15 @@
-source = gitflip.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp templates.cpp objunpack.cpp objparse.cpp arrowstore.cpp
-objects = file.o pack.o index.o exceptions.o objects.o deltadb.o templates.o objunpack.o objparse.o arrowstore.o
-executables = gitflip
+source = gitflip.cpp query.cpp file.cpp pack.cpp index.cpp exceptions.cpp objects.cpp deltadb.cpp objunpack.cpp objparse.cpp arrowstore.cpp
+objects = file.o pack.o index.o exceptions.o objects.o deltadb.o objunpack.o objparse.o arrowstore.o
+executables = gitflip query
 
 CPP = g++
-CPPFLAGS = -g -O2 --std=c++0x -pedantic -Werror -Wall -fno-implicit-templates -pipe -pthread -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=500 -D_GNU_SOURCE
+CPPFLAGS = -g -O2 --std=c++0x -pedantic -Werror -Wall -fno-implicit-templates -pipe -D_FILE_OFFSET_BITS=64 -D_XOPEN_SOURCE=500 -D_GNU_SOURCE
 LIBS = -lz
 
 all: $(executables)
+
+query: query.o $(objects)
+	$(CPP) $(CPPFLAGS) -o $@ $+ $(LIBS)
 
 gitflip: gitflip.o $(objects)
 	$(CPP) $(CPPFLAGS) -o $@ $+ $(LIBS)
