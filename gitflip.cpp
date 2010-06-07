@@ -17,7 +17,7 @@ int main( int argc, char *argv[] )
   char *pack_filename = argv[ 1 ];
   char *idx_filename = argv[ 2 ];
 
-  ArrowStore *arrows = new ArrowStore();
+  ArrowStore *arrows = new ArrowStore( (char *) "gitflip.db" );
 
   try {
     Pack *pack = new Pack( pack_filename, idx_filename );
@@ -33,10 +33,6 @@ int main( int argc, char *argv[] )
     cout << e->str();
     return 1;
   }
-
-  printf( "Number of arrows: %d.\n", arrows->get_size() );
-
-  arrows->writeout();
 
   delete arrows;
 

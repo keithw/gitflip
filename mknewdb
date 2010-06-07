@@ -1,0 +1,2 @@
+rm -f gitflip.db
+sqlite3 gitflip.db 'CREATE TABLE arrows ( src TEXT, dest TEXT ); CREATE INDEX dest_index ON arrows( dest ); CREATE INDEX src_index ON arrows( src );'

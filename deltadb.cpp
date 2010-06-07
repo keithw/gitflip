@@ -9,9 +9,6 @@ DeltaDB::DeltaDB( Pack *pack, ArrowStore *s_arrows )
 {
   arrows = s_arrows;
 
-  /* Pre-size hash tables for performance */
-  arrows->resize( pack->get_object_count() );
-
   /* Track all the objects in the pack file */
   fprintf( stderr, "Ingesting objects... " );
   for ( unsigned int i = 0; i < pack->get_object_count(); i++ ) {
